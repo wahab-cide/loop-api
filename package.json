@@ -1,0 +1,36 @@
+{
+  "name": "loop-api",
+  "version": "1.0.0",
+  "description": "Loop Rideshare API - Backend services for the Loop rideshare application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "vercel --prod",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
+    "@neondatabase/serverless": "^1.0.1",
+    "@types/uuid": "^10.0.0",
+    "dotenv": "^17.0.1",
+    "expo-server-sdk": "^3.15.0",
+    "jose": "^6.0.11",
+    "next": "^14.2.30",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "stripe": "^18.3.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "typescript": "~5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true
+}
