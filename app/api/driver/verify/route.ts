@@ -38,7 +38,6 @@ export async function POST(request: Request) {
     if (existingVerification && existingVerification.overall_status === 'pending') {
       // Try to retrieve the existing Stripe session
       try {
-    const sql = getDatabase();
         const existingSession = await stripe.identity.verificationSessions.retrieve(
           existingVerification.stripe_verification_id
         );
