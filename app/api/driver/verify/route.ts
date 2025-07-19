@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     if (existingVerification && existingVerification.overall_status === 'pending') {
       // Try to retrieve the existing Stripe session
       try {
+    const sql = getDatabase();
         const existingSession = await stripe.identity.verificationSessions.retrieve(
           existingVerification.stripe_verification_id
         );
@@ -88,21 +89,29 @@ export async function POST(request: Request) {
     }
 
     // Create Stripe Identity verification session
-    const verificationSession = await stripe.identity.verificationSessions.create({
-      type: 'document',
-      metadata: {
-        user_id: user.id,
-        clerk_id: clerkId,
-      },
-      options: {
-        document: {
-          allowed_types: ['driving_license', 'passport', 'id_card'],
-          require_id_number: true,
-          require_live_capture: true,
-          require_matching_selfie: true,
+    let verificationSession;
+    try {
+      console.log('Creating Stripe Identity verification session for user:', clerkId);
+      verificationSession = await stripe.identity.verificationSessions.create({
+        type: 'document',
+        metadata: {
+          user_id: user.id,
+          clerk_id: clerkId,
         },
-      },
-    });
+        options: {
+          document: {
+            allowed_types: ['driving_license', 'passport', 'id_card'],
+            require_id_number: true,
+            require_live_capture: true,
+            require_matching_selfie: true,
+          },
+        },
+      });
+      console.log('Stripe Identity session created successfully:', verificationSession.id);
+    } catch (stripeError) {
+      console.error('Stripe Identity creation error:', stripeError);
+      throw new Error(`Stripe Identity error: ${stripeError instanceof Error ? stripeError.message : 'Unknown error'}`);
+    }
 
     // Store verification session in database
     await sql`

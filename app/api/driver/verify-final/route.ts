@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // Check if verification exists
     const [verification] = await sql`
-      SELECT id, identity_status, document_status, insurance_doc_url
+      SELECT id, identity_status, document_status
       FROM driver_verification
       WHERE user_id = ${user.id}
     `;
@@ -36,13 +36,9 @@ export async function POST(request: Request) {
       return Response.json({ error: 'No verification record found' }, { status: 404 });
     }
 
-    // Check if identity is verified and insurance is uploaded
+    // Check if identity is verified (removed insurance document requirement)
     if (verification.identity_status !== 'verified') {
       return Response.json({ error: 'Identity verification not completed' }, { status: 400 });
-    }
-
-    if (!verification.insurance_doc_url) {
-      return Response.json({ error: 'Insurance document not uploaded' }, { status: 400 });
     }
 
     // Complete the verification process

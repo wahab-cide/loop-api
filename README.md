@@ -172,6 +172,14 @@ The API uses consistent error responses:
 }
 ```
 
+Common HTTP status codes:
+- `200` - Success
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `500` - Internal Server Error
+
 ## Rate Limiting
 
 API endpoints are rate-limited to prevent abuse:
@@ -179,6 +187,13 @@ API endpoints are rate-limited to prevent abuse:
 - Authentication: 10 requests/minute
 - Payment endpoints: 5 requests/minute
 
+## Security
+
+- All API routes require authentication except webhooks
+- Input validation on all endpoints
+- SQL injection prevention with parameterized queries
+- CORS enabled for mobile app origins
+- Environment variables for sensitive data
 
 ## Monitoring
 

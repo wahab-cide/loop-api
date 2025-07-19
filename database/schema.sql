@@ -205,9 +205,11 @@ ALTER TABLE users
 DROP COLUMN IF EXISTS push_token,
 DROP COLUMN IF EXISTS notification_preferences;
 
-
-
 -- Notifications and Push Token Management Schema
+-- Run this SQL to add notification support to your existing database
+
+-- Enable UUID generation if not already enabled
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 1. User Push Tokens table
 -- Stores Expo push tokens for each user device
@@ -314,8 +316,6 @@ INSERT INTO notification_preferences (user_id)
 SELECT id FROM users 
 WHERE id NOT IN (SELECT user_id FROM notification_preferences)
 ON CONFLICT (user_id) DO NOTHING;
-
-
 
 -- 7. Sample location-based query for nearby rides notification
 -- This is an example of how to find users who should be notified about new rides
@@ -506,7 +506,23 @@ FROM users;
 -- STEP 10: Add index
 CREATE INDEX IF NOT EXISTS idx_users_names ON users(first_name, last_name);
 
+-- STEP 11: Keep name column for data consistency
+-- DECISION: Keep the name column to maintain data integrity and backward compatibility
+-- The name column will be automatically populated from first_name + last_name
+-- All queries now use CONCAT(first_name, ' ', last_name) instead of selecting name directly
+-- This provides the best of both worlds: proper name structure + backward compatibility
 
+-- Optional: Add trigger to auto-update name column when first_name/last_name change
+-- CREATE OR REPLACE FUNCTION update_user_name() RETURNS TRIGGER AS $$
+-- BEGIN
+--   NEW.name = CONCAT(NEW.first_name, ' ', COALESCE(NEW.last_name, ''));
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+-- 
+-- CREATE TRIGGER trigger_update_user_name
+--   BEFORE UPDATE OF first_name, last_name ON users
+--   FOR EACH ROW EXECUTE FUNCTION update_user_name();
 
 -- ================================================================
 -- DRIVER VERIFICATION SYSTEM - Stripe Identity Integration
@@ -525,6 +541,7 @@ CREATE TABLE IF NOT EXISTS driver_verification (
   -- Document URLs (optional - Stripe handles storage)
   license_front_url     TEXT,
   license_back_url      TEXT,
+  insurance_doc_url     TEXT,
   
   -- Verification Status
   identity_status       VARCHAR(50) DEFAULT 'pending', -- pending, verified, failed
@@ -799,7 +816,7 @@ CREATE INDEX IF NOT EXISTS bookings_completed_rating_idx ON bookings(completed_a
 -- NOTIFICATIONS & PUSH TOKENS
 -- ================================================================
 
-
+-- Enable UUID generation if not already enabled
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 1. User Push Tokens table
